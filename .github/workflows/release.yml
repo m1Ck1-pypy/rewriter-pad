@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-all-platforms:
+  build-platforms:
     strategy:
       matrix:
         include:
@@ -55,7 +55,7 @@ jobs:
           path: ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
 
   create-release:
-    needs: build-all-platforms
+    needs: build-platforms
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -67,8 +67,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            RewriterPad-linux/RewriterPad
-            RewriterPad-macos/RewriterPad
             RewriterPad.exe/RewriterPad.exe
           generate_release_notes: true
           draft: false
