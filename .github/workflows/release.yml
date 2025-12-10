@@ -48,11 +48,16 @@ jobs:
           rustup target add ${{ matrix.target }}
           cargo build --release --target ${{ matrix.target }} --bin RewriterPad
 
+      - name: Prepare artifacts for release (rename for uniqueness)
+        run: |
+          cp "./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}" "${{ matrix.asset_name }}"
+        shell: bash
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
-          path: ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          path: ${{ matrix.asset_name }}
 
   create-release:
     needs: build-platforms
@@ -63,12 +68,17 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
+      - name: Rename artifacts to ensure unique names
+        run: |
+          mv "RewriterPad-linux/RewriterPad" "RewriterPad-linux" 2>/dev/null || true
+          mv "RewriterPad-macos/RewriterPad" "RewriterPad-macos" 2>/dev/null || true
+
       - name: Create release and upload assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             RewriterPad.exe/RewriterPad.exe
-            RewriterPad-linux/RewriterPad
-            RewriterPad-macos/RewriterPad
+            RewriterPad-linux
+            RewriterPad-macos
           generate_release_notes: true
           draft: false
