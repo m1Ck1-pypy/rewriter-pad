@@ -1,0 +1,25 @@
+[package]
+name = "rewriter-pad"
+version = "0.1.0"
+edition = "2024"
+description = "A simple rewriter application"
+license = "MIT"
+repository = "https://github.com/m1Ck1-pypy/rewriter-pad"
+
+[lib]
+name = "rewriter_pad"
+path = "src/lib.rs"
+
+[[bin]]
+name = "RewriterPad"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.33.2"
+egui = "0.33.2"
+image = "0.25.9"
+rfd = "0.16.0"
+winres = "0.1.12"
+
+[build-dependencies]
+winres = "0.1.12"
