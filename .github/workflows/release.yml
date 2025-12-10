@@ -68,17 +68,17 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Rename artifacts to ensure unique names
+      - name: Display downloaded artifacts for debugging
         run: |
-          mv "RewriterPad-linux/RewriterPad" "RewriterPad-linux" 2>/dev/null || true
-          mv "RewriterPad-macos/RewriterPad" "RewriterPad-macos" 2>/dev/null || true
+          ls -la
+          find . -type f -name "RewriterPad*" -exec echo "Found: {}" \;
 
       - name: Create release and upload assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
             RewriterPad.exe/RewriterPad.exe
-            RewriterPad-linux
-            RewriterPad-macos
+            RewriterPad-linux/RewriterPad-linux
+            RewriterPad-macos/RewriterPad-macos
           generate_release_notes: true
           draft: false
