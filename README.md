@@ -1,6 +1,6 @@
 # Rewriter Pad
 
-A simple application for rewriting files.
+A simple application for rewriting txt files.
 
 ## Features
 
