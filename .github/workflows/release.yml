@@ -68,5 +68,7 @@ jobs:
         with:
           files: |
             RewriterPad.exe/RewriterPad.exe
+            RewriterPad-linux/RewriterPad
+            RewriterPad-macos/RewriterPad
           generate_release_notes: true
           draft: false
