@@ -50,7 +50,11 @@ impl TopMenu {
                             app.save_new_file();
                         };
                         if ui.button("Close").clicked() {
-                            std::process::exit(0);
+                            if app.is_modified {
+                                app.close_modal = true;
+                            } else {
+                                std::process::exit(0);
+                            }
                         };
                     });
                 });

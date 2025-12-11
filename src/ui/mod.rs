@@ -1,5 +1,6 @@
 mod bottom_bar;
 mod main_panel;
+mod modal;
 mod top_menu;
 
 use egui::{IconData, ViewportBuilder};
@@ -11,7 +12,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::ui::{bottom_bar::BottomBar, main_panel::MainPanel, top_menu::TopMenu};
+use crate::ui::{
+    bottom_bar::BottomBar, main_panel::MainPanel, modal::CloseModal, top_menu::TopMenu,
+};
 
 #[derive(Debug, Default)]
 pub struct AppStore {
@@ -43,6 +46,7 @@ pub struct UiApp {
     pub font_size: f32,
     pub copy_text: String,
     pub is_new_file: bool,
+    pub close_modal: bool,
 }
 
 impl UiApp {
@@ -70,11 +74,12 @@ impl UiApp {
             is_modified: false,
             font_size: 16.0,
             copy_text: String::new(),
+            close_modal: false,
         }
     }
 
     /// Изменяем размер шрифта
-    fn handle_zoomsize(&mut self, ctx: &egui::Context) {
+    fn handle_inputs(&mut self, ctx: &egui::Context) {
         ctx.input(|i| {
             for event in i.events.iter() {
                 if i.modifiers.ctrl
@@ -161,13 +166,25 @@ impl eframe::App for UiApp {
         let mut top_menu = TopMenu::new();
         let mut main_panel = MainPanel::new();
         let mut bottom_bar = BottomBar::new();
+        let close_modal = CloseModal::new();
 
-        self.handle_zoomsize(ctx);
+        self.handle_inputs(ctx);
+
+        let close_requested = ctx.input(|i| i.viewport().close_requested());
+
+        if close_requested && self.is_modified {
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            self.close_modal = true;
+        }
 
         ui_frame!(ctx, FRAME, |_ui| {
             top_menu.render(ctx, self);
             main_panel.render(ctx, self);
             bottom_bar.render(ctx, self);
+
+            if self.close_modal {
+                close_modal.render(ctx, self);
+            }
         });
     }
 }
@@ -234,9 +251,5 @@ pub fn app_ui() -> eframe::Result<()> {
         ..Default::default()
     };
 
-    eframe::run_native(
-        "RewritePad",
-        opt,
-        Box::new(|_| Ok(Box::new(UiApp::new()))),
-    )
+    eframe::run_native("RewritePad", opt, Box::new(|_| Ok(Box::new(UiApp::new()))))
 }
