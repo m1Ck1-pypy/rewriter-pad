@@ -10,8 +10,7 @@ impl TopMenu {
 
     pub fn render(&mut self, ctx: &egui::Context, app: &mut UiApp) {
         egui::TopBottomPanel::top("top_panel")
-            .show_separator_line(false)
-            .show_separator_line(true)
+            // .show_separator_line(true)
             .show(ctx, |ui| {
                 egui::MenuBar::new().ui(ui, |ui| {
                     ui.menu_button("File", |ui| {
@@ -34,7 +33,7 @@ impl TopMenu {
                                     app.is_modified = false;
                                 }
                                 Err(err) => {
-                                    eprintln!("Error reading file: {}", err);
+                                    eprintln!("Error reading file: {err}");
                                 }
                             }
                         }
