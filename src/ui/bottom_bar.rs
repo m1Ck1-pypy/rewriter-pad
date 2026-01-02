@@ -28,9 +28,11 @@ impl BottomBar {
                                     "File: Saved"
                                 };
 
+                                ui.label(format!("{}%", app.scale));
+                                ui.label(" | ");
                                 ui.label(modified_title);
                                 ui.label(" | ");
-                                ui.label(format!("Symbols: {}", app.text.len()));
+                                ui.label(format!("Symbols: {}", app.text.chars().count()));
                             });
                         });
                 });

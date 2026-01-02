@@ -44,9 +44,11 @@ pub struct UiApp {
     pub text: String,
     pub is_modified: bool,
     pub font_size: f32,
-    pub copy_text: String,
+    // pub copy_text: String,
+    pub highlight_text: String,
     pub is_new_file: bool,
     pub close_modal: bool,
+    pub scale: i32,
 }
 
 impl UiApp {
@@ -73,14 +75,16 @@ impl UiApp {
             is_new_file,
             is_modified: false,
             font_size: 16.0,
-            copy_text: String::new(),
+            // copy_text: String::new(),
+            highlight_text: String::new(),
             close_modal: false,
+            scale: 100,
         }
     }
 
     /// Изменяем размер шрифта
     fn handle_inputs(&mut self, ctx: &egui::Context) {
-        ctx.input(|i| {
+        ctx.input_mut(|i| {
             for event in i.events.iter() {
                 if i.modifiers.ctrl
                     && let egui::Event::MouseWheel { delta, .. } = event
@@ -88,20 +92,17 @@ impl UiApp {
                 {
                     let zoom_factor = if delta.y > 0.0 { 1.1 } else { 0.9 };
                     self.font_size = (self.font_size * zoom_factor).clamp(8.0, 72.0);
+                    self.scale = (self.scale as f32 * zoom_factor).clamp(20.0, 450.0) as i32;
                 }
+            }
 
-                if i.modifiers.ctrl
-                    && let egui::Event::Key { key, pressed, .. } = event
-                    && *pressed
-                    && *key == egui::Key::S
-                {
-                    if self.is_new_file {
-                        self.save_new_file();
-                    } else {
-                        self.save_updated_file();
-                    }
-                    self.is_new_file = false;
+            if i.consume_key(egui::Modifiers::CTRL, egui::Key::S) {
+                if self.is_new_file {
+                    self.save_new_file();
+                } else {
+                    self.save_updated_file();
                 }
+                self.is_new_file = false;
             }
         });
     }
