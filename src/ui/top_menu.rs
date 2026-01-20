@@ -19,21 +19,10 @@ impl TopMenu {
                     };
                     if ui.add(egui::Button::new("Open")).clicked()
                         && let Some(path) = rfd::FileDialog::new()
-                            .add_filter("Text files", &["txt", "md"])
-                            // .add_filter("All files", &["*"])
+                            .add_filter("Text files", &["txt", "md", "json"])
                             .pick_file()
                     {
-                        match std::fs::read_to_string(&path) {
-                            Ok(content) => {
-                                app.text = content;
-                                app.file_path = path.to_string_lossy().to_string();
-                                app.is_new_file = false;
-                                app.is_modified = false;
-                            }
-                            Err(err) => {
-                                eprintln!("Error reading file: {err}");
-                            }
-                        }
+                        app.open_file(path);
                     }
 
                     if ui.button("Save").clicked() {

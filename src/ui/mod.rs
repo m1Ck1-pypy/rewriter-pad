@@ -8,7 +8,7 @@ use std::{
     env, f32,
     fs::File,
     io::Write,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };
 
@@ -34,21 +34,18 @@ impl AppStore {
     }
 }
 
-pub type StoreSafe = Arc<Mutex<AppStore>>;
-
 const TITLE: &str = "RewritePad";
 
 pub struct UiApp {
-    pub store: StoreSafe,
     pub file_path: String,
     pub text: String,
     pub is_modified: bool,
     pub font_size: f32,
-    // pub copy_text: String,
     pub highlight_text: String,
     pub is_new_file: bool,
     pub close_modal: bool,
     pub scale: i32,
+    pub error_drop_file: bool,
 }
 
 impl UiApp {
@@ -69,16 +66,15 @@ impl UiApp {
         let is_new_file = file_path.is_empty() || matches!(text.len(), 0);
 
         Self {
-            store,
             file_path,
             text,
             is_new_file,
             is_modified: false,
             font_size: 16.0,
-            // copy_text: String::new(),
             highlight_text: String::new(),
             close_modal: false,
             scale: 100,
+            error_drop_file: false,
         }
     }
 
@@ -104,7 +100,29 @@ impl UiApp {
                 }
                 self.is_new_file = false;
             }
+
+            if !i.raw.dropped_files.is_empty() {
+                let dropped_files = i.raw.dropped_files.clone();
+
+                for file in dropped_files {
+                    if let Some(path) = file.path {
+                        if Self::check_file_extension(&path) {
+                            self.open_file(path);
+                        } else {
+                            self.error_drop_file = true;
+                        }
+                    }
+                }
+            }
         });
+    }
+
+    fn check_file_extension(file_path: &Path) -> bool {
+        file_path
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(|ext| matches!(ext, "txt" | "json" | "md"))
+            .unwrap_or(false)
     }
 
     /// Сохраняем новый файл
@@ -151,6 +169,20 @@ impl UiApp {
             }
         }
     }
+
+    pub fn open_file(&mut self, path: PathBuf) {
+        match std::fs::read_to_string(&path) {
+            Ok(content) => {
+                self.text = content;
+                self.file_path = path.to_string_lossy().to_string();
+                self.is_new_file = false;
+                self.is_modified = false;
+            }
+            Err(err) => {
+                eprintln!("Error reading file: {err}");
+            }
+        }
+    }
 }
 
 #[macro_export]
@@ -184,7 +216,11 @@ impl eframe::App for UiApp {
             bottom_bar.render(ctx, self);
 
             if self.close_modal {
-                close_modal.render(ctx, self);
+                close_modal.render_close(ctx, self);
+            }
+
+            if self.error_drop_file {
+                close_modal.render_error(ctx, self);
             }
         });
     }

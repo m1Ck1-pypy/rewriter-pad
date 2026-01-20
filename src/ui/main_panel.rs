@@ -23,36 +23,36 @@ impl MainPanel {
                         .font(FontSelection::FontId(FontId::monospace(app.font_size)));
 
                     let text_field = text_edit_widget.show(ui);
-
+                    
                     let text_field_response = text_field.response;
 
                     if !ctx.memory(|m| m.has_focus(text_edit_id)) {
                         ctx.memory_mut(|m| m.request_focus(text_edit_id));
-                    }
-
-                    if let Some(text_cursor_range) = text_field.cursor_range {
-                        let copy_text = text_cursor_range.slice_str(&app.text);
-                        app.highlight_text = copy_text.to_string();
+                        if let Some(text_cursor_range) = text_field.cursor_range {
+                            app.highlight_text = text_cursor_range.slice_str(&app.text).to_owned();
+                        }
                     }
 
                     if text_field_response.changed() {
                         app.is_modified = true;
                     };
 
-                    // egui::Popup::context_menu(&text_field_response)
-                    //     .id(egui::Id::new("context_menu"))
-                    //     .show(|ui| {
-                    //         ui.set_min_width(150.0);
-                    //         if ui.button("Copy").clicked() {
-                    //             ctx.copy_text(app.highlight_text.to_string());
-                    //         }
-                    //         if ui.button("Paste").clicked() {
-                    //             println!("paste");
-                    //         }
-                    //         if ui.button("Cut").clicked() {
-                    //             println!("cut");
-                    //         }
-                    //     });
+                    // text_field_response.context_menu(|ui| {
+                    //     ui.set_min_width(150.0);
+                    //     ctx.memory_mut(|m| m.request_focus(text_edit_id));
+                    //     if ui.button("Copy").clicked() {
+                    //         ctx.copy_text(app.highlight_text.clone());
+                    //         ui.close();
+                    //     }
+                    //     if ui.button("Paste").clicked() {
+                    //         println!("paste");
+                    //         ui.close();
+                    //     }
+                    //     if ui.button("Cut").clicked() {
+                    //         println!("cut");
+                    //         ui.close();
+                    //     }
+                    // });
                 });
         });
     }

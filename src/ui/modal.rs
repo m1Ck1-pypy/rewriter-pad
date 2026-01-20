@@ -9,7 +9,7 @@ impl CloseModal {
         Self
     }
 
-    pub fn render(&self, ctx: &egui::Context, app: &mut UiApp) {
+    pub fn render_close(&self, ctx: &egui::Context, app: &mut UiApp) {
         let modal = Modal::new(Id::new("modal_close")).show(ctx, |ui| {
             ui.set_width(300.0);
             ui.heading("Close the RewritePad");
@@ -36,6 +36,25 @@ impl CloseModal {
 
         if modal.should_close() {
             app.close_modal = false;
+        }
+    }
+
+    pub fn render_error(&self, ctx: &egui::Context, app: &mut UiApp) {
+        let modal = Modal::new(Id::new("modal_error")).show(ctx, |ui| {
+            ui.set_width(300.0);
+            ui.heading("Error Opening File");
+            ui.add_space(20.0);
+            ui.label("An error occurred while opening the file. The file format is not supported.");
+            ui.add_space(20.0);
+            ui.horizontal(|ui| {
+                if ui.button("OK").clicked() {
+                    app.error_drop_file = false;
+                }
+            });
+        });
+
+        if modal.should_close() {
+            app.error_drop_file = false;
         }
     }
 }
